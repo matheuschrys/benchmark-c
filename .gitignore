@@ -1,0 +1,7 @@
+benchmark_ram
+benchmark_register
+*.exe
+*.o
+*.out
+__pycache__/
+*.py[cod]

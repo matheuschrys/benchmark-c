@@ -1,0 +1,50 @@
+Execucao 1
+Programa iniciado.
+Calculando o tempo de processamento...
+Tempo decorrido: 1.052731 segundos
+
+Execucao 2
+Programa iniciado.
+Calculando o tempo de processamento...
+Tempo decorrido: 1.052259 segundos
+
+Execucao 3
+Programa iniciado.
+Calculando o tempo de processamento...
+Tempo decorrido: 1.052573 segundos
+
+Execucao 4
+Programa iniciado.
+Calculando o tempo de processamento...
+Tempo decorrido: 1.043363 segundos
+
+Execucao 5
+Programa iniciado.
+Calculando o tempo de processamento...
+Tempo decorrido: 1.055390 segundos
+
+Execucao 6
+Programa iniciado.
+Calculando o tempo de processamento...
+Tempo decorrido: 1.051428 segundos
+
+Execucao 7
+Programa iniciado.
+Calculando o tempo de processamento...
+Tempo decorrido: 1.045174 segundos
+
+Execucao 8
+Programa iniciado.
+Calculando o tempo de processamento...
+Tempo decorrido: 1.055350 segundos
+
+Execucao 9
+Programa iniciado.
+Calculando o tempo de processamento...
+Tempo decorrido: 1.050876 segundos
+
+Execucao 10
+Programa iniciado.
+Calculando o tempo de processamento...
+Tempo decorrido: 1.050271 segundos
+
