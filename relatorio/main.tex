@@ -1,0 +1,209 @@
+% Comandos sugeridos para compilar:
+% latexmk -pdf main.tex
+% ou:
+% pdflatex main.tex
+% bibtex main
+% pdflatex main.tex
+% pdflatex main.tex
+
+\documentclass[12pt,oneside,a4paper,brazil]{abntex2}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{babel}
+\usepackage{microtype}
+\usepackage{indentfirst}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage[alf]{abntex2cite}
+
+\setlength{\parindent}{1.25cm}
+\setlength{\parskip}{0.2cm}
+\OnehalfSpacing
+\justifying
+
+\lstdefinestyle{codigoC}{
+    language=C,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red!60!black},
+    numbers=left,
+    numberstyle=\tiny,
+    frame=single,
+    breaklines=true,
+    tabsize=4,
+    captionpos=b
+}
+
+\titulo{Benchmark em C: comparação entre variáveis \texttt{long int} e \texttt{register long int} em Windows x64 e Linux x64}
+\autor{Chrysthyan Matheus}
+\local{Manaus/AM}
+\data{2026}
+\orientador{Prof. Joethe Moraes de Carvalho}
+\instituicao{%
+Ministério da Educação\\
+Instituto Federal de Educação, Ciência e Tecnologia do Amazonas\\
+Campus Manaus Centro\\
+Curso de Ciência da Computação\\
+Disciplina: Sistemas Digitais}
+\preambulo{Relatório acadêmico apresentado ao Instituto Federal de Educação, Ciência e Tecnologia do Amazonas -- Campus Manaus Centro, como parte das atividades da disciplina Sistemas Digitais.}
+
+\begin{document}
+
+\imprimircapa
+
+\begin{folhaderosto}
+\begin{center}
+{\ABNTEXchapterfont\large Ministério da Educação}\\
+{\ABNTEXchapterfont\large Instituto Federal de Educação, Ciência e Tecnologia do Amazonas}\\
+{\ABNTEXchapterfont\large Campus Manaus Centro}\\[1.5cm]
+{\ABNTEXchapterfont\large Curso de Ciência da Computação}\\
+{\ABNTEXchapterfont\large Disciplina: Sistemas Digitais}\\
+{\ABNTEXchapterfont\large Professor: Joethe Moraes de Carvalho}\\[2.5cm]
+{\ABNTEXchapterfont\bfseries\Large Benchmark em C: comparação entre variáveis \texttt{long int} e \texttt{register long int} em Windows x64 e Linux x64}\\[2.5cm]
+\end{center}
+\begin{flushright}
+Aluno: Chrysthyan Matheus\\
+E-mail: 202500895@ifam.edu.br\\
+Turma/período: 2º Período\\
+Data de entrega: 16/06/2026
+\end{flushright}
+\vfill
+\begin{center}
+Manaus/AM\\
+2026
+\end{center}
+\end{folhaderosto}
+
+\textual
+
+\chapter{Introdução}
+
+Benchmark é um procedimento utilizado para medir e comparar o desempenho de sistemas computacionais, programas, componentes de hardware ou ambientes de execução sob uma metodologia definida. Em trabalhos de avaliação de desempenho, a medição deve ser feita de forma controlada, com repetição das execuções e registro dos valores obtidos, pois fatores como carga do sistema operacional, frequência do processador, compilador e processos em segundo plano podem alterar os tempos observados \cite{jain1991art,hennessy2019computer}.
+
+A medição de desempenho computacional é importante porque permite observar, com base em dados experimentais, como diferentes ambientes ou escolhas de implementação influenciam o tempo de execução de um programa. Neste relatório, o desempenho é analisado pela latência de processamento, isto é, pelo tempo necessário para concluir a execução de dois laços aninhados implementados em linguagem C.
+
+O objetivo deste trabalho é comparar o tempo de execução de dois programas em C. O primeiro utiliza variáveis normais do tipo \texttt{long int} para os contadores dos laços; o segundo utiliza a palavra-chave \texttt{register} com variáveis \texttt{register long int}. Ambos executam dois laços aninhados de 0 até 60000 e medem o tempo com a função \texttt{clock()}, da biblioteca \texttt{time.h} \cite{kernighan1988c,cppreference_clock}.
+
+O enunciado original da atividade mencionava a comparação entre uma plataforma Intel de 64 bits no Windows e uma plataforma ARM no Linux. Entretanto, neste experimento, os testes foram adaptados e realizados na mesma máquina em dual boot, comparando Windows x64 e Linux x64 no mesmo hardware. Portanto, este relatório não afirma que houve execução em ARM; a análise apresentada refere-se especificamente à comparação entre Windows 11 Intel 64 bits e Linux Intel 64 bits.
+
+\chapter{Desenvolvimento}
+
+\section{Ambiente de testes}
+
+Os testes foram realizados em uma mesma máquina física com dual boot. Essa escolha reduz diferenças de hardware entre os ambientes e concentra a comparação no sistema operacional, no ambiente de compilação e nas condições de execução. As características informadas para o ambiente foram:
+
+\begin{itemize}
+    \item Processador: Intel Core i5-12400F;
+    \item Memória RAM: 32 GB DDR5;
+    \item Sistema operacional Windows: Windows 11, Intel 64 bits;
+    \item Sistema operacional Linux: Linux, Intel 64 bits;
+    \item Compilador no Windows: GCC, versão mais recente disponível no ambiente;
+    \item Compilador no Linux: GCC, versão mais recente disponível no ambiente.
+\end{itemize}
+
+Como a distribuição e a versão exata do Linux e as versões numéricas do GCC não foram registradas nos arquivos do projeto, esses dados devem ser confirmados caso seja necessário maior rigor de reprodutibilidade.
+
+\section{Programas avaliados}
+
+Foram avaliados dois programas em linguagem C. O programa com variáveis normais declara os contadores como \texttt{long int x, y}. O trecho principal é apresentado a seguir.
+
+\begin{lstlisting}[style=codigoC,caption={Trecho principal com variáveis long int}]
+long int x, y;
+clock_t begin = clock();
+
+for (x = 0; x < 60000; x++)
+    for (y = 0; y < 60000; y++)
+        ;
+
+clock_t end = clock();
+\end{lstlisting}
+
+O segundo programa utiliza \texttt{register long int x, y}. Em C, a palavra-chave \texttt{register} indica ao compilador que uma variável será muito usada e que, se possível, poderia ser armazenada em registrador. Em compiladores modernos, essa palavra-chave funciona apenas como uma sugestão, e o compilador pode ignorá-la conforme suas próprias estratégias de alocação de registradores \cite{kernighan1988c,gcc2026}. O trecho principal é apresentado a seguir.
+
+\begin{lstlisting}[style=codigoC,caption={Trecho principal com variáveis register long int}]
+register long int x, y;
+clock_t begin = clock();
+
+for (x = 0; x < 60000; x++)
+    for (y = 0; y < 60000; y++)
+        ;
+
+clock_t end = clock();
+\end{lstlisting}
+
+A medição foi feita pela diferença entre os valores retornados por \texttt{clock()} antes e depois dos laços. O resultado foi convertido para segundos pela divisão por \texttt{CLOCKS\_PER\_SEC}.
+
+\section{Metodologia de execução}
+
+Cada programa foi executado 10 vezes em cada ambiente, resultando em quatro conjuntos de medições: Windows com \texttt{long int}, Windows com \texttt{register long int}, Linux com \texttt{long int} e Linux com \texttt{register long int}. A compilação foi realizada com \texttt{gcc -O0}, com o objetivo de evitar otimizações automáticas que pudessem remover ou alterar o comportamento dos laços vazios.
+
+A média aritmética foi calculada pela soma dos tempos dividida pelo número de execuções. O desvio padrão foi calculado para indicar a dispersão dos tempos em relação à média. O speedup foi calculado conforme a Equação~\ref{eq:speedup}.
+
+\begin{equation}
+\label{eq:speedup}
+Speedup = \frac{Tempo\ médio\ do\ sistema\ de\ referência}{Tempo\ médio\ do\ sistema\ comparado}
+\end{equation}
+
+Nesta análise, o Windows foi usado como sistema de referência para calcular o speedup do Linux, pois os tempos médios no Linux foram menores nos dois programas.
+
+\section{Resultados obtidos}
+
+\begin{table}[htbp]
+\centering
+\caption{Tempos de execução dos benchmarks em segundos}
+\label{tab:resultados}
+\begin{tabular}{ccccc}
+\toprule
+Execução & Windows \texttt{long int} & Windows \texttt{register} & Linux \texttt{long int} & Linux \texttt{register} \\
+\midrule
+1 & 1,187000 & 0,983000 & 1,052731 & 0,452373 \\
+2 & 1,177000 & 0,974000 & 1,052259 & 0,453411 \\
+3 & 1,205000 & 0,932000 & 1,052573 & 0,455823 \\
+4 & 1,147000 & 0,975000 & 1,043363 & 0,452255 \\
+5 & 1,208000 & 0,957000 & 1,055390 & 0,452102 \\
+6 & 1,188000 & 0,953000 & 1,051428 & 0,452353 \\
+7 & 1,204000 & 0,945000 & 1,045174 & 0,454206 \\
+8 & 1,223000 & 0,955000 & 1,055350 & 0,455323 \\
+9 & 1,197000 & 0,945000 & 1,050876 & 0,455767 \\
+10 & 1,188000 & 0,961000 & 1,050271 & 0,454044 \\
+\midrule
+Média & 1,192400 & 0,958000 & 1,050941 & 0,453766 \\
+Desvio padrão & 0,020711 & 0,015734 & 0,003919 & 0,001492 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Com base nas médias, o speedup sem \texttt{register}, comparando Windows \texttt{long int} com Linux \texttt{long int}, foi:
+
+\begin{equation}
+Speedup_{sem\ register} = \frac{1,192400}{1,050941} \approx 1,13
+\end{equation}
+
+O speedup com \texttt{register}, comparando Windows \texttt{register long int} com Linux \texttt{register long int}, foi:
+
+\begin{equation}
+Speedup_{com\ register} = \frac{0,958000}{0,453766} \approx 2,11
+\end{equation}
+
+Também é possível observar a diferença interna entre os programas em cada sistema. No Windows, a média passou de 1,192400 s para 0,958000 s, o que indica uma redução de tempo no programa com \texttt{register}. No Linux, a média passou de 1,050941 s para 0,453766 s, indicando redução ainda maior no programa com \texttt{register}. Apesar disso, como \texttt{register} é apenas uma sugestão ao compilador, essa diferença deve ser interpretada com cuidado e limitada ao ambiente testado.
+
+\chapter{Conclusão}
+
+Os resultados obtidos indicaram que, no cenário analisado, o Linux Intel 64 bits apresentou melhor desempenho que o Windows 11 Intel 64 bits nos dois programas avaliados. Para o programa com variáveis \texttt{long int}, o tempo médio foi de 1,192400 s no Windows e 1,050941 s no Linux, resultando em speedup aproximado de 1,13 para o Linux. Para o programa com \texttt{register long int}, o tempo médio foi de 0,958000 s no Windows e 0,453766 s no Linux, resultando em speedup aproximado de 2,11 para o Linux.
+
+O uso de \texttt{register} apresentou diferença relevante nos resultados coletados, principalmente no Linux. Entretanto, não se deve concluir que a palavra-chave sempre produzirá o mesmo ganho em outros programas, compiladores ou arquiteturas. Em compiladores modernos, a alocação de registradores é controlada pelo próprio compilador, e a palavra-chave \texttt{register} pode ser ignorada ou ter efeito dependente do contexto.
+
+As diferenças observadas podem ter sido influenciadas por fatores como sistema operacional, implementação do compilador, processos em segundo plano, gerenciamento de recursos, frequência dinâmica do processador, temperatura e resolução da medição de tempo. Além disso, o benchmark executa laços vazios, o que representa um caso específico e limitado. Assim, os resultados não devem ser generalizados para todo o desempenho dos sistemas operacionais, mas apenas para o experimento realizado com os programas, compilação e máquina descritos neste relatório.
+
+\postextual
+\bibliography{referencias}
+
+\end{document}
