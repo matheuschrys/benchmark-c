@@ -1,0 +1,5 @@
+arquivo,ambiente,programa,execucoes,media_segundos,desvio_padrao_segundos
+linux_benchmark_ram.txt,Linux Intel 64 bits,long int,10,1.050941,0.003919
+linux_benchmark_register.txt,Linux Intel 64 bits,register long int,10,0.453766,0.001492
+windows_benchmark_ram.txt,Windows Intel 64 bits,long int,10,1.192400,0.020711
+windows_benchmark_register.txt,Windows Intel 64 bits,register long int,10,0.958000,0.015734
